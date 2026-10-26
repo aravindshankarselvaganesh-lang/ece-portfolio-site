@@ -39,18 +39,16 @@ export function useLenis() {
     gsap.ticker.add(updateTicker);
     gsap.ticker.lagSmoothing(500, 33);
 
-    // Ensure scroll starts at the top (first page) on reload/mount unless deep link is requested
+    // Ensure scroll starts unconditionally at the top (first page) on reload/mount
     const resetToTop = () => {
       try {
         if ('scrollRestoration' in history) {
           history.scrollRestoration = 'manual';
         }
-        if (!window.location.hash) {
-          window.scrollTo(0, 0);
-          document.documentElement.scrollTop = 0;
-          document.body.scrollTop = 0;
-          lenis.scrollTo(0, { immediate: true });
-        }
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        lenis.scrollTo(0, { immediate: true });
       } catch (e) {}
     };
 

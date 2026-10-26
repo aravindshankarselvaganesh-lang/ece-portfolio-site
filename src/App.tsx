@@ -29,18 +29,6 @@ export const App: React.FC = () => {
     setIsAppReady(true);
   }, []);
 
-  // Handle deep-link scrolling once app is ready
-  useEffect(() => {
-    if (isAppReady && window.location.hash) {
-      const target = document.querySelector(window.location.hash);
-      if (target) {
-        setTimeout(() => {
-          target.scrollIntoView({ behavior: 'smooth' });
-        }, 150);
-      }
-    }
-  }, [isAppReady]);
-
   // Efficient IntersectionObserver for active section pill nav (zero scroll event thrashing)
   useEffect(() => {
     const sections = ['hero', 'about', 'experience', 'builds', 'works', 'services', 'contact'];
