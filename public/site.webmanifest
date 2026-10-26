@@ -1,0 +1,21 @@
+{
+  "name": "Aravind Shankar — Hardware & Embedded Portfolio",
+  "short_name": "Aravind ECE",
+  "description": "Portfolio of Aravind Shankar, ECE student specializing in embedded systems and PCB design.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07070A",
+  "theme_color": "#07070A",
+  "icons": [
+    {
+      "src": "/images/portrait-cutout.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/portrait-cutout.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

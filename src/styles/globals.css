@@ -1,0 +1,197 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #EDEDEA;
+  --ink: #0A0A0C;
+  --ink-2: #17171C;
+  --mute-light: #5E5E58;
+  --mute-dark: #9A9AA3;
+  --signal: #39FF88;
+  --tds-display: 'Archivo', sans-serif;
+  --tds-sans: 'Geist', sans-serif;
+}
+
+html {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  scroll-behavior: auto;
+  scrollbar-gutter: stable;
+}
+
+/* Accessible high-contrast focus rings for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--signal) !important;
+  outline-offset: 3px !important;
+}
+
+/* Skip to content link */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 999999;
+  padding: 0.75rem 1.25rem;
+  background: var(--ink);
+  color: var(--signal);
+  font-family: monospace;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border: 1px solid var(--signal);
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: top 0.2s ease-in-out;
+}
+
+.skip-to-content:focus {
+  top: 1rem;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ink);
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a32;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--signal);
+}
+
+/* Display Typography Utilities matching reference images */
+.font-display-stretch {
+  font-family: 'Clash Display', 'Cabinet Grotesk', 'Syne', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.88;
+  text-transform: uppercase;
+}
+
+.font-display-condensed {
+  font-family: 'Clash Display', 'Cabinet Grotesk', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.font-label-mono {
+  font-family: 'Space Grotesk', 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* Green Signal Typography: Space Grotesk, Weight 500, 18-24px, letter-spacing -0.01em */
+.font-signal {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 500 !important;
+  font-size: clamp(18px, 1.3vw, 22px) !important;
+  letter-spacing: -0.01em !important;
+  color: var(--signal) !important;
+  line-height: 1.25 !important;
+}
+
+.font-signal-sm {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 18px !important;
+  letter-spacing: -0.01em !important;
+  color: var(--signal) !important;
+  line-height: 1.25 !important;
+}
+
+.font-signal-lg {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 500 !important;
+  font-size: clamp(20px, 1.5vw, 24px) !important;
+  letter-spacing: -0.01em !important;
+  color: var(--signal) !important;
+  line-height: 1.2 !important;
+}
+
+/* Vertical gradient fade on Hero second headline line (exact match to Screenshot 1 "PORTFOLIO") */
+.hero-gradient-text {
+  background: linear-gradient(180deg, #0A0A0C 15%, rgba(10, 10, 12, 0.48) 75%, rgba(10, 10, 12, 0.18) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Hard Section Transitions */
+.section-paper {
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
+.section-ink {
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+.section-ink-2 {
+  background-color: var(--ink-2);
+  color: var(--paper);
+}
+
+/* Portrait mask fading at bottom */
+.portrait-fade-mask {
+  mask-image: linear-gradient(to bottom, #000 68%, transparent 98%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 68%, transparent 98%);
+}
+
+/* 3D Perspective utilities for curved carousel & hex drum */
+.perspective-1200 {
+  perspective: 1200px;
+  perspective-origin: center center;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+/* Hide cursor on desktop when custom cursor is active */
+@media (hover: hover) and (pointer: fine) {
+  body.has-custom-cursor,
+  body.has-custom-cursor a,
+  body.has-custom-cursor button,
+  body.has-custom-cursor [role="button"] {
+    cursor: none !important;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes sweepLight {
+  0% {
+    transform: translateY(-150%) translateX(-150%) rotate(45deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.7;
+  }
+  70% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(150%) translateX(150%) rotate(45deg);
+    opacity: 0;
+  }
+}
+
