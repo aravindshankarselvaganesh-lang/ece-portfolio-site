@@ -3,7 +3,6 @@ import { useLenis } from './hooks/useLenis';
 import { Preloader } from './components/Preloader';
 import { Grain } from './components/Grain';
 import { Cursor } from './components/Cursor';
-import { PointerLight } from './components/PointerLight';
 import { Nav } from './components/Nav';
 import { Hero } from './components/Hero';
 import { About } from './components/About';
@@ -76,9 +75,6 @@ export const App: React.FC = () => {
 
       {/* Film grain overlay across entire viewport */}
       <Grain />
-
-      {/* Dynamic ambient pointer light that spreads with motion */}
-      <PointerLight activeSection={activeSection} />
 
       {/* Custom desktop cursor with difference blending & labels */}
       <Cursor />

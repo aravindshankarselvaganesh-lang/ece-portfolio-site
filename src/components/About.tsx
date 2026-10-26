@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { portfolioContent } from '../content/content';
 import { GlitchText } from './GlitchText';
 import { SplinePowerRig } from './SplinePowerRig';
+import { SignalLightField } from './SignalLightField';
 import { Zap } from 'lucide-react';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 
@@ -93,15 +94,18 @@ export const About: React.FC = () => {
       className="relative min-h-screen w-full bg-[#0A0A0C] text-[#EDEDEA] flex flex-col justify-between pt-24 pb-8 px-6 md:px-12 overflow-hidden select-none"
     >
       {/* =========================================================================
-          Full-Page Interactive 3D Spline Hardware Background
+          Full-Page Interactive 3D Spline Hardware Background & Background Signals
           ========================================================================= */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-auto">
         <SplinePowerRig className="w-full h-full" showHelperPill={false} />
 
+        {/* Dynamic Background Signals that act as the light as the pointer moves */}
+        <SignalLightField className="z-[2]" />
+
         {/* Dynamic gradient overlay to ensure 100% crisp contrast for left bio text */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 pointer-events-none bg-gradient-to-r from-[#0A0A0C]/95 via-[#0A0A0C]/65 to-[#0A0A0C]/20"
+          className="absolute inset-0 pointer-events-none bg-gradient-to-r from-[#0A0A0C]/90 via-[#0A0A0C]/50 to-transparent z-[3]"
         />
 
         {/* Ambient Top & Bottom Edge Blends to smoothly transition into adjacent sections */}
