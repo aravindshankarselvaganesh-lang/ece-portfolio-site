@@ -178,7 +178,7 @@ export const About: React.FC = () => {
         >
           {/* Top-Left Split Headline Word: "ABOUT" */}
           <div className="w-full flex justify-start select-none">
-            <h2 className="font-display font-black text-[clamp(64px,11.5vw,170px)] leading-[0.82] tracking-tighter text-white">
+            <h2 className="font-display font-black text-[clamp(44px,11.5vw,170px)] leading-[0.82] tracking-tighter text-white">
               <GlitchText text={about.headlinePart1} trigger={glitchTrigger} />
             </h2>
           </div>
@@ -196,7 +196,7 @@ export const About: React.FC = () => {
 
           {/* Bottom-Right Split Headline Word: "ME" */}
           <div className="w-full flex justify-end select-none">
-            <span className="font-display font-black text-[clamp(64px,11.5vw,170px)] leading-[0.82] tracking-tighter text-white">
+            <span className="font-display font-black text-[clamp(44px,11.5vw,170px)] leading-[0.82] tracking-tighter text-white">
               <GlitchText text={about.headlinePart2} trigger={glitchTrigger} />
             </span>
           </div>

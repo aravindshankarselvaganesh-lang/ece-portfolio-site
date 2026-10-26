@@ -81,7 +81,7 @@ export const Services: React.FC = () => {
           </span>
         </div>
 
-        <h2 className="font-display font-black text-[clamp(44px,8vw,120px)] leading-[0.88] tracking-tighter text-ink uppercase">
+        <h2 className="font-display font-black text-[clamp(32px,8vw,120px)] leading-[0.88] tracking-tighter text-ink uppercase">
           <ScrambleText text={services.headline} />
         </h2>
 

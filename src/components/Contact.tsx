@@ -41,33 +41,32 @@ export const Contact: React.FC = () => {
             {contact.sectionTag}
           </span>
         </div>
-        <span className="font-signal-sm uppercase">
+        <span className="font-signal-sm uppercase hidden sm:inline">
           {meta.statusText}
         </span>
       </div>
 
       {/* Centerpiece: Giant Centered "LET'S TALK" + Magnetic Pills (Screenshot 8) */}
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto my-auto flex flex-col items-center justify-center text-center py-12">
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto my-auto flex flex-col items-center justify-center text-center py-8 sm:py-12">
         {/* Giant Centered Headline: Each letter lifts 8px and brightens on hover */}
-        <div className="w-full flex items-center justify-center flex-wrap select-none">
+        <div className="w-full flex items-center justify-center flex-wrap select-none px-2">
           <h2
             aria-label={headingText}
-            className="font-display font-black text-[clamp(64px,15vw,250px)] leading-[0.84] tracking-[-0.04em] text-white flex justify-center"
+            className="font-display font-black text-[clamp(36px,12.5vw,220px)] leading-[0.88] tracking-[-0.04em] text-white flex flex-wrap justify-center gap-x-[0.28em]"
           >
-            {headingText.split('').map((char, i) => {
-              if (char === ' ') {
-                return <span key={i} aria-hidden="true" className="inline-block w-[0.25em]">&nbsp;</span>;
-              }
-              return (
-                <span
-                  key={i}
-                  aria-hidden="true"
-                  className="inline-block transition-transform duration-200 hover:-translate-y-2 hover:text-signal cursor-default will-change-transform"
-                >
-                  {char}
-                </span>
-              );
-            })}
+            {headingText.split(' ').map((word, wIdx) => (
+              <span key={wIdx} className="inline-block whitespace-nowrap">
+                {word.split('').map((char, cIdx) => (
+                  <span
+                    key={cIdx}
+                    aria-hidden="true"
+                    className="inline-block transition-transform duration-200 hover:-translate-y-2 hover:text-signal cursor-default will-change-transform"
+                  >
+                    {char}
+                  </span>
+                ))}
+              </span>
+            ))}
           </h2>
         </div>
 

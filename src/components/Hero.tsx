@@ -144,10 +144,10 @@ export const Hero: React.FC<HeroProps> = ({ isReady }) => {
           className="relative z-10 w-full text-center flex flex-col items-center justify-center leading-[0.86] tracking-[-0.035em] font-display font-bold text-ink select-none"
         >
           {/* Lab / ECE Discipline Pill above Headline */}
-          <div className="overflow-hidden mb-3 md:mb-5">
-            <div className="hero-line-inner inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-ink/15 bg-ink/5 font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-ink/80">
-              <span className="w-2 h-2 rounded-full bg-signal animate-pulse" />
-              <span>{hero.departmentTag}</span>
+          <div className="overflow-hidden mb-3 md:mb-5 max-w-[92vw]">
+            <div className="hero-line-inner inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 rounded-full border border-ink/15 bg-ink/5 font-mono text-[9px] sm:text-[11px] uppercase tracking-wider text-ink/80 text-center">
+              <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-signal animate-pulse shrink-0" />
+              <span className="truncate sm:overflow-visible">{hero.departmentTag}</span>
             </div>
           </div>
 

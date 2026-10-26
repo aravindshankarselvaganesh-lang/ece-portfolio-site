@@ -56,8 +56,10 @@ export const Nav: React.FC<NavProps> = ({ activeSection }) => {
   return (
     <>
       <header
-        className="fixed top-0 left-0 w-full z-40 px-5 md:px-8 py-5 transition-transform duration-300 pointer-events-none"
-        style={{ mixBlendMode: 'difference' }}
+        className="fixed top-0 left-0 w-full z-40 px-5 md:px-8 py-3.5 md:py-5 transition-all duration-300 pointer-events-auto md:pointer-events-none bg-[#0A0A0C]/90 backdrop-blur-md border-b border-white/10 md:bg-transparent md:backdrop-blur-none md:border-b-0 md:mix-blend-difference"
+        style={{
+          WebkitBackdropFilter: 'blur(12px)',
+        }}
       >
         <div className="max-w-content mx-auto flex items-center justify-between pointer-events-auto">
           {/* Left: Logo & blinking signal dot */}

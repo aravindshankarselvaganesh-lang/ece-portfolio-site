@@ -207,22 +207,29 @@ export const Experience: React.FC = () => {
           CH.03 — CAREER TRAJECTORY // 2023 — 2026
         </div>
         <h2
-          className="m-0 font-syne font-extrabold text-[clamp(44px,7.5vw,108px)] leading-[0.9] tracking-[-0.03em] uppercase text-white"
+          className="m-0 font-syne font-extrabold text-[clamp(32px,7.5vw,108px)] leading-[0.95] tracking-[-0.03em] uppercase text-white flex flex-wrap justify-center gap-x-[0.28em] gap-y-1"
           aria-label={title}
         >
-          {[...title].map((ch, i) => (
-            <motion.span
-              key={i}
-              aria-hidden
-              className="inline-block"
-              initial={reduce ? false : { opacity: 0, y: '0.3em' }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.6 }}
-              transition={{ duration: 0.7, ease, delay: i * 0.045 }}
-            >
-              {ch === ' ' ? '\u00A0' : ch}
-            </motion.span>
-          ))}
+          {title.split(' ').map((word, wIdx) => {
+            const charOffset = title.split(' ').slice(0, wIdx).join(' ').length + (wIdx > 0 ? 1 : 0);
+            return (
+              <span key={wIdx} className="inline-block whitespace-nowrap">
+                {[...word].map((ch, cIdx) => (
+                  <motion.span
+                    key={cIdx}
+                    aria-hidden
+                    className="inline-block"
+                    initial={reduce ? false : { opacity: 0, y: '0.3em' }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.6 }}
+                    transition={{ duration: 0.7, ease, delay: (charOffset + cIdx) * 0.045 }}
+                  >
+                    {ch}
+                  </motion.span>
+                ))}
+              </span>
+            );
+          })}
         </h2>
         <p className="mt-4 font-jakarta font-medium text-xs sm:text-sm text-white/60 tracking-wider uppercase">
           [ 4 Engineering Phases · Circuits, Firmware, Power & RF ]

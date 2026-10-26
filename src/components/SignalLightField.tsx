@@ -88,7 +88,29 @@ export const SignalLightField: React.FC<SignalLightFieldProps> = ({
       mouse.current.targetY = -2000;
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!e.touches[0]) return;
+      const rect = container.getBoundingClientRect();
+      mouse.current.targetX = e.touches[0].clientX - rect.left;
+      mouse.current.targetY = e.touches[0].clientY - rect.top;
+
+      if (mouse.current.x < -1000) {
+        mouse.current.x = mouse.current.targetX;
+        mouse.current.y = mouse.current.targetY;
+        prevMouse.current.x = mouse.current.targetX;
+        prevMouse.current.y = mouse.current.targetY;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      mouse.current.targetX = -2000;
+      mouse.current.targetY = -2000;
+    };
+
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('touchstart', handleTouchMove, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
 
     const io = new IntersectionObserver(
@@ -260,6 +282,19 @@ export const SignalLightField: React.FC<SignalLightFieldProps> = ({
         ctx.arc(mx, my, fieldRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
+      } else {
+        // Idle electric pulses from the central chip when no finger or cursor is active (e.g. mobile idle state)
+        if (tick % 70 === 0 && Math.random() < 0.5) {
+          const idleAngle = Math.random() * Math.PI * 2;
+          const idleDist = 70 + Math.random() * 90;
+          spawnArc(
+            chipCenterX,
+            chipCenterY,
+            chipCenterX + Math.cos(idleAngle) * idleDist,
+            chipCenterY + Math.sin(idleAngle) * idleDist,
+            0.85
+          );
+        }
       }
 
       // Draw all active electric signal arcs
@@ -346,6 +381,9 @@ export const SignalLightField: React.FC<SignalLightFieldProps> = ({
       ro.disconnect();
       io.disconnect();
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchstart', handleTouchMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
       document.removeEventListener('mouseleave', handleMouseLeave);
       if (animFrameId.current) cancelAnimationFrame(animFrameId.current);
     };
