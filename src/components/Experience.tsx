@@ -225,7 +225,7 @@ export const Experience: React.FC = () => {
           ))}
         </h2>
         <p className="mt-4 font-jakarta font-medium text-xs sm:text-sm text-white/60 tracking-wider uppercase">
-          [ 4 Engineering Phases · Analog Circuits, Embedded Firmware, Power Systems & RF Telemetry ]
+          [ 4 Engineering Phases · Circuits, Firmware, Power & RF ]
         </p>
       </div>
 
