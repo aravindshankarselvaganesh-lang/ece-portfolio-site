@@ -37,3 +37,5 @@ pnpm-debug.log*
 *.tmp
 WhatsApp Image *.jpeg
 process_portrait.py
+
+.vercel
