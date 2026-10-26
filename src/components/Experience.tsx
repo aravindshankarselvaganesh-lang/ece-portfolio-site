@@ -244,7 +244,11 @@ export const Experience: React.FC = () => {
             className={`sticky pb-6 sm:pb-7 ${
               idx === panels.length - 1 ? 'pb-12 sm:pb-16' : ''
             }`}
-            style={{ top: `calc(74px + ${idx * 16}px)` }}
+            style={{
+              top: `calc(74px + ${idx * 16}px)`,
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+            }}
           >
             <div className="group block bg-[#121217] rounded-2xl border border-white/15 overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.85)] transition-all duration-300 hover:border-signal/70 hover:shadow-[0_0_40px_rgba(57,255,136,0.15)] text-[#EDEDEA] no-underline">
               

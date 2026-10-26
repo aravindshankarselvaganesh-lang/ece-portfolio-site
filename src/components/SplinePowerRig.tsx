@@ -19,19 +19,32 @@ export const SplinePowerRig: React.FC<SplinePowerRigProps> = ({
   const [hasError, setHasError] = useState(false);
   const appRef = useRef<any>(null);
 
-  // Defer 3D canvas loading until section is near viewport
+  // Persistent IntersectionObserver: load when near, and pause/cull WebGL loop when offscreen
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) {
+        const isIntersecting = entries[0]?.isIntersecting ?? false;
+        if (isIntersecting) {
           setShouldLoad(true);
-          observer.disconnect();
+          try {
+            appRef.current?.play?.();
+          } catch {}
+          if (canvasRef.current) {
+            canvasRef.current.style.visibility = 'visible';
+          }
+        } else {
+          try {
+            appRef.current?.stop?.();
+          } catch {}
+          if (canvasRef.current) {
+            canvasRef.current.style.visibility = 'hidden';
+          }
         }
       },
-      { rootMargin: '300px' }
+      { rootMargin: '150px', threshold: 0.01 }
     );
 
     observer.observe(el);

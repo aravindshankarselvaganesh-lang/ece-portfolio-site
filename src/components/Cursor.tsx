@@ -11,6 +11,9 @@ export const Cursor: React.FC = () => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
   const isVisibleRef = useRef<boolean>(false);
+  const lastTargetRef = useRef<EventTarget | null>(null);
+  const isHoveredRef = useRef<boolean>(false);
+  const cursorLabelRef = useRef<string>('');
 
   useEffect(() => {
     if (isTouch) return;
@@ -31,27 +34,39 @@ export const Cursor: React.FC = () => {
       xTo(e.clientX);
       yTo(e.clientY);
 
-      // Check if hovering an element with cursor attribute
-      const target = e.target as HTMLElement | null;
-      const cursorTarget = target?.closest('[data-cursor]') as HTMLElement | null;
-      const isButtonOrLink = target?.closest('button, a, [role="button"], input, textarea');
+      // Throttled DOM inspection: only recompute when mouse moves over a different target element
+      if (e.target !== lastTargetRef.current) {
+        lastTargetRef.current = e.target;
+        const target = e.target as HTMLElement | null;
+        const cursorTarget = target?.closest?.('[data-cursor]') as HTMLElement | null;
+        const isButtonOrLink = target?.closest?.('button, a, [role="button"], input, textarea');
 
-      if (cursorTarget) {
-        const label = cursorTarget.getAttribute('data-cursor') || '';
-        setCursorLabel(label);
-        setIsHovered(true);
-      } else if (isButtonOrLink) {
-        setCursorLabel('');
-        setIsHovered(true);
-      } else {
-        setCursorLabel('');
-        setIsHovered(false);
+        let nextLabel = '';
+        let nextHovered = false;
+
+        if (cursorTarget) {
+          nextLabel = cursorTarget.getAttribute('data-cursor') || '';
+          nextHovered = true;
+        } else if (isButtonOrLink) {
+          nextLabel = '';
+          nextHovered = true;
+        }
+
+        if (nextHovered !== isHoveredRef.current) {
+          isHoveredRef.current = nextHovered;
+          setIsHovered(nextHovered);
+        }
+        if (nextLabel !== cursorLabelRef.current) {
+          cursorLabelRef.current = nextLabel;
+          setCursorLabel(nextLabel);
+        }
       }
     };
 
     const onMouseLeave = () => {
       isVisibleRef.current = false;
       setIsVisible(false);
+      lastTargetRef.current = null;
     };
 
     const onMouseEnter = () => {
@@ -60,9 +75,12 @@ export const Cursor: React.FC = () => {
     };
 
     const onScroll = () => {
-      // Clear stuck cursor hover labels while scrolling between sections
-      setIsHovered(false);
-      setCursorLabel('');
+      if (isHoveredRef.current || cursorLabelRef.current) {
+        isHoveredRef.current = false;
+        cursorLabelRef.current = '';
+        setIsHovered(false);
+        setCursorLabel('');
+      }
     };
 
     window.addEventListener('mousemove', onMouseMove, { passive: true });

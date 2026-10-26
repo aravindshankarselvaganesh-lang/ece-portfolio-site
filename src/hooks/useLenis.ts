@@ -15,7 +15,7 @@ export function useLenis() {
       return;
     }
 
-    // Initialize Lenis with smooth easing and calibrated trackpad responsiveness
+    // Initialize Lenis with smooth easing and native touch pass-through to eliminate mobile lag
     const lenis = new Lenis({
       duration: 1.15,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -23,7 +23,8 @@ export function useLenis() {
       gestureOrientation: 'vertical',
       smoothWheel: true,
       wheelMultiplier: 0.95,
-      touchMultiplier: 1.6,
+      touchMultiplier: 1.0,
+      syncTouch: false,
       infinite: false,
     });
 
