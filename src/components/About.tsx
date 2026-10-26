@@ -100,7 +100,7 @@ export const About: React.FC = () => {
         <SplinePowerRig className="w-full h-full" showHelperPill={false} />
 
         {/* Dynamic Background Signals that act as the light as the pointer moves */}
-        <SignalLightField className="z-[2]" />
+        <SignalLightField className="z-[5]" />
 
         {/* Dynamic gradient overlay to ensure 100% crisp contrast for left bio text */}
         <div

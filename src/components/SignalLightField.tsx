@@ -5,11 +5,18 @@ interface SignalLightFieldProps {
   className?: string;
 }
 
-interface PulsePacket {
-  waveIndex: number;
-  xRatio: number; // 0 to 1 across the width
-  speed: number;
-  size: number;
+interface ArcPoint {
+  x: number;
+  y: number;
+}
+
+interface ElectricArc {
+  points: ArcPoint[];
+  subBranches: ArcPoint[][];
+  life: number;
+  maxLife: number;
+  width: number;
+  intensity: number;
 }
 
 export const SignalLightField: React.FC<SignalLightFieldProps> = ({
@@ -19,16 +26,18 @@ export const SignalLightField: React.FC<SignalLightFieldProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  // Animation and physics state in refs for zero React render overhead
+  // Mouse & motion physics
   const mouse = useRef({ x: -2000, y: -2000, targetX: -2000, targetY: -2000 });
-  const velocity = useRef(0);
   const prevMouse = useRef({ x: -2000, y: -2000 });
-  const excitationRadius = useRef(280);
+  const velocity = useRef(0);
   const isVisible = useRef(true);
   const animFrameId = useRef<number | null>(null);
 
-  // Packets of signal energy travelling along wave traces
-  const packets = useRef<PulsePacket[]>([]);
+  // Active electric arcs
+  const arcs = useRef<ElectricArc[]>([]);
+  const sparkParticles = useRef<
+    { x: number; y: number; vx: number; vy: number; life: number; size: number }[]
+  >([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -41,15 +50,6 @@ export const SignalLightField: React.FC<SignalLightFieldProps> = ({
     let width = 0;
     let height = 0;
     let dpr = 1;
-
-    // Initialize pulse packets
-    const WAVE_COUNT = 20;
-    packets.current = Array.from({ length: 32 }, () => ({
-      waveIndex: Math.floor(Math.random() * WAVE_COUNT),
-      xRatio: Math.random(),
-      speed: 0.0015 + Math.random() * 0.003,
-      size: 2 + Math.random() * 2.5,
-    }));
 
     const resize = () => {
       if (!container || !canvas) return;
@@ -70,7 +70,6 @@ export const SignalLightField: React.FC<SignalLightFieldProps> = ({
     const ro = new ResizeObserver(resize);
     ro.observe(container);
 
-    // Track mouse coordinates relative to container
     const handleMouseMove = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect();
       mouse.current.targetX = e.clientX - rect.left;
@@ -92,7 +91,6 @@ export const SignalLightField: React.FC<SignalLightFieldProps> = ({
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
 
-    // Pause canvas when off screen to conserve resources
     const io = new IntersectionObserver(
       (entries) => {
         isVisible.current = entries[0]?.isIntersecting ?? false;
@@ -101,7 +99,94 @@ export const SignalLightField: React.FC<SignalLightFieldProps> = ({
     );
     io.observe(container);
 
-    let time = 0;
+    // Recursive midpoint displacement generator for electric lightning signal
+    const generateLightningPoints = (
+      x1: number,
+      y1: number,
+      x2: number,
+      y2: number,
+      displace: number,
+      subdivide: number = 4
+    ): ArcPoint[] => {
+      if (subdivide <= 0) {
+        return [
+          { x: x1, y: y1 },
+          { x: x2, y: y2 },
+        ];
+      }
+
+      const midX = (x1 + x2) / 2;
+      const midY = (y1 + y2) / 2;
+
+      // Perpendicular normal vector
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const len = Math.hypot(dx, dy);
+      if (len < 1) return [{ x: x1, y: y1 }, { x: x2, y: y2 }];
+
+      const nx = -dy / len;
+      const ny = dx / len;
+
+      // Jagged displacement like the lightning bolt in the chip
+      const offset = (Math.random() - 0.5) * displace;
+      const ptX = midX + nx * offset;
+      const ptY = midY + ny * offset;
+
+      const left = generateLightningPoints(x1, y1, ptX, ptY, displace * 0.55, subdivide - 1);
+      const right = generateLightningPoints(ptX, ptY, x2, y2, displace * 0.55, subdivide - 1);
+
+      return left.slice(0, -1).concat(right);
+    };
+
+    // Spawn an electric signal arc
+    const spawnArc = (
+      fromX: number,
+      fromY: number,
+      toX: number,
+      toY: number,
+      intensity: number = 1
+    ) => {
+      const dist = Math.hypot(toX - fromX, toY - fromY);
+      const points = generateLightningPoints(fromX, fromY, toX, toY, dist * 0.45, 4);
+
+      // 1 or 2 small sub-branches forking off the main lightning signal
+      const subBranches: ArcPoint[][] = [];
+      if (points.length > 5 && Math.random() > 0.3) {
+        const branchIndex = Math.floor(Math.random() * (points.length - 3)) + 1;
+        const startPt = points[branchIndex];
+        const angle = Math.atan2(toY - fromY, toX - fromX) + (Math.random() - 0.5) * 1.2;
+        const subLen = dist * (0.3 + Math.random() * 0.3);
+        const endX = startPt.x + Math.cos(angle) * subLen;
+        const endY = startPt.y + Math.sin(angle) * subLen;
+        subBranches.push(generateLightningPoints(startPt.x, startPt.y, endX, endY, subLen * 0.4, 3));
+      }
+
+      arcs.current.push({
+        points,
+        subBranches,
+        life: 1,
+        maxLife: 6 + Math.floor(Math.random() * 5),
+        width: 1.5 + intensity * 1.5,
+        intensity,
+      });
+
+      // Spawn subtle electric sparks
+      for (let s = 0; s < 3; s++) {
+        const randPt = points[Math.floor(Math.random() * points.length)];
+        const spAngle = Math.random() * Math.PI * 2;
+        const spSpeed = 1 + Math.random() * 3;
+        sparkParticles.current.push({
+          x: randPt.x,
+          y: randPt.y,
+          vx: Math.cos(spAngle) * spSpeed,
+          vy: Math.sin(spAngle) * spSpeed,
+          life: 1,
+          size: 1 + Math.random() * 2,
+        });
+      }
+    };
+
+    let tick = 0;
 
     const render = () => {
       if (!isVisible.current || width === 0 || height === 0) {
@@ -109,149 +194,147 @@ export const SignalLightField: React.FC<SignalLightFieldProps> = ({
         return;
       }
 
-      time += prefersReducedMotion ? 0.004 : 0.016;
+      tick++;
 
       // Smooth mouse lerp
-      mouse.current.x += (mouse.current.targetX - mouse.current.x) * 0.2;
-      mouse.current.y += (mouse.current.targetY - mouse.current.y) * 0.2;
+      mouse.current.x += (mouse.current.targetX - mouse.current.x) * 0.35;
+      mouse.current.y += (mouse.current.targetY - mouse.current.y) * 0.35;
 
-      // Calculate instantaneous pointer motion velocity
       const dx = mouse.current.x - prevMouse.current.x;
       const dy = mouse.current.y - prevMouse.current.y;
       const dist = Math.hypot(dx, dy);
       prevMouse.current.x = mouse.current.x;
       prevMouse.current.y = mouse.current.y;
 
-      velocity.current += (dist - velocity.current) * 0.15;
-
-      // Expand excitation light radius as pointer moves
-      const targetRadius = 260 + Math.min(velocity.current * 8, 180);
-      excitationRadius.current += (targetRadius - excitationRadius.current) * 0.12;
+      velocity.current += (dist - velocity.current) * 0.2;
 
       ctx.clearRect(0, 0, width, height);
 
       const mx = mouse.current.x;
       const my = mouse.current.y;
-      const radius = excitationRadius.current;
+      const chipCenterX = width * 0.5;
+      const chipCenterY = height * 0.52;
 
-      // Draw all signal channels
-      const stepX = 14; // Sample resolution along X
-      const pointsPerWave = Math.ceil(width / stepX) + 1;
+      // When cursor is active inside the container
+      if (mx > -100 && mx < width + 100 && my > -100 && my < height + 100) {
+        // Spawn electric signal arcs when pointer moves or is near the chip
+        const moveThreshold = prefersReducedMotion ? 25 : 4;
+        const isMoving = dist > moveThreshold;
+        const chipDist = Math.hypot(mx - chipCenterX, my - chipCenterY);
 
-      for (let i = 0; i < WAVE_COUNT; i++) {
-        const baseNormY = (i + 1) / (WAVE_COUNT + 1);
-        const baseY = baseNormY * height;
-
-        // Wave parameters for varying harmonics
-        const freq = 0.0025 + (i % 5) * 0.0012;
-        const phaseSpeed = 1.0 + (i % 3) * 0.4;
-        const phase = time * phaseSpeed + i * 0.7;
-        const baseAmp = 8 + (i % 4) * 6;
-
-        // Prepare points buffer for this wave
-        ctx.beginPath();
-
-        for (let j = 0; j <= pointsPerWave; j++) {
-          const px = j * stepX;
-
-          // Pure carrier wave formula + modulation
-          const harmonic1 = Math.sin(px * freq + phase) * baseAmp;
-          const harmonic2 = Math.cos(px * (freq * 0.45) - phase * 0.6) * (baseAmp * 0.45);
-          let py = baseY + harmonic1 + harmonic2;
-
-          // Distance from this wave point to mouse pointer
-          const pDist = Math.hypot(px - mx, py - my);
-
-          // Interaction: When pointer is near, wave bends slightly toward pointer
-          if (pDist < radius && mx > -500) {
-            const pullFactor = (1 - pDist / radius) * 0.35;
-            py += (my - py) * pullFactor;
-          }
-
-          if (j === 0) {
-            ctx.moveTo(px, py);
-          } else {
-            ctx.lineTo(px, py);
+        // 1. As pointer moves, spawn outward branching electrical signals
+        if (isMoving && tick % 2 === 0) {
+          const arcCount = Math.min(1 + Math.floor(velocity.current * 0.15), 4);
+          for (let a = 0; a < arcCount; a++) {
+            const spreadRadius = 140 + Math.min(velocity.current * 6, 260);
+            const angle = Math.random() * Math.PI * 2;
+            const targetX = mx + Math.cos(angle) * spreadRadius;
+            const targetY = my + Math.sin(angle) * spreadRadius;
+            spawnArc(mx, my, targetX, targetY, Math.min(1.4, 0.7 + velocity.current * 0.05));
           }
         }
 
-        // Check if wave passes near mouse to determine light level
-        const waveDistToMouse = Math.abs(baseY - my);
-        const isNearPointer = waveDistToMouse < radius && mx > -500;
+        // 2. Coupling with the chip in the center: Arcs leap between pointer & chip
+        if (chipDist < 480 && Math.random() < 0.25) {
+          spawnArc(mx, my, chipCenterX + (Math.random() - 0.5) * 80, chipCenterY + (Math.random() - 0.5) * 60, 1.2);
+        }
 
-        if (isNearPointer) {
-          // Dynamic phosphor light intensity based on mouse proximity
-          const proximity = Math.max(0, 1 - waveDistToMouse / radius);
-          const lightAlpha = 0.2 + proximity * 0.8;
+        // 3. Resting ambient micro-signals around cursor
+        if (!isMoving && Math.random() < 0.08) {
+          const idleRadius = 70 + Math.random() * 60;
+          const idleAngle = Math.random() * Math.PI * 2;
+          spawnArc(mx, my, mx + Math.cos(idleAngle) * idleRadius, my + Math.sin(idleAngle) * idleRadius, 0.7);
+        }
 
-          // Multi-layer glowing stroke: the signal line acts as physical neon light
-          ctx.save();
-          ctx.globalAlpha = lightAlpha;
-          ctx.shadowColor = '#39FF88';
-          ctx.shadowBlur = 12 + proximity * 18;
-          ctx.lineWidth = 1.2 + proximity * 2.2;
+        // 4. Soft radial electric field glow around pointer matching chip's turquoise/cyan aura
+        const fieldRadius = 160 + Math.min(velocity.current * 4, 180);
+        const glowGrad = ctx.createRadialGradient(mx, my, 0, mx, my, fieldRadius);
+        glowGrad.addColorStop(0, 'rgba(60, 253, 137, 0.22)'); // Chip's #3cfd89
+        glowGrad.addColorStop(0.3, 'rgba(34, 211, 238, 0.14)'); // Electric cyan
+        glowGrad.addColorStop(0.7, 'rgba(46, 114, 113, 0.06)'); // Chip rim teal
+        glowGrad.addColorStop(1, 'transparent');
 
-          // Gradient across the illuminated region
-          const grad = ctx.createRadialGradient(mx, my, 20, mx, my, radius);
-          grad.addColorStop(0, '#FFFFFF'); // Hot white photon core
-          grad.addColorStop(0.35, '#39FF88'); // High-voltage phosphor green
-          grad.addColorStop(0.75, 'rgba(57, 255, 136, 0.4)');
-          grad.addColorStop(1, 'rgba(57, 255, 136, 0.08)');
+        ctx.save();
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath();
+        ctx.arc(mx, my, fieldRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
 
-          ctx.strokeStyle = grad;
+      // Draw all active electric signal arcs
+      for (let i = arcs.current.length - 1; i >= 0; i--) {
+        const arc = arcs.current[i];
+        const alpha = arc.life / arc.maxLife;
+
+        // Draw primary lightning signal
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'miter';
+
+        // Outer electric bloom (matching chip signal glow #3cfd89 / cyan)
+        ctx.shadowColor = '#3cfd89';
+        ctx.shadowBlur = 14 * alpha;
+        ctx.strokeStyle = `rgba(34, 211, 238, ${0.7 * alpha})`;
+        ctx.lineWidth = arc.width * 2.2;
+
+        ctx.beginPath();
+        arc.points.forEach((pt, idx) => {
+          if (idx === 0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        });
+        ctx.stroke();
+
+        // Inner hot-white electric signal core
+        ctx.shadowColor = '#00F5FF';
+        ctx.shadowBlur = 6 * alpha;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.95 * alpha})`;
+        ctx.lineWidth = Math.max(1, arc.width * 0.85);
+        ctx.stroke();
+
+        // Sub-branches
+        arc.subBranches.forEach((sub) => {
+          ctx.strokeStyle = `rgba(60, 253, 137, ${0.65 * alpha})`;
+          ctx.lineWidth = Math.max(0.8, arc.width * 0.55);
+          ctx.beginPath();
+          sub.forEach((pt, sIdx) => {
+            if (sIdx === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+          });
           ctx.stroke();
-          ctx.restore();
-        } else {
-          // Resting background trace: faint, subtle ambient oscilloscope signal
-          ctx.save();
-          ctx.lineWidth = 0.9;
-          ctx.strokeStyle = 'rgba(57, 255, 136, 0.07)';
-          ctx.stroke();
-          ctx.restore();
+        });
+
+        ctx.restore();
+
+        // Life decay
+        arc.life -= 1;
+        if (arc.life <= 0) {
+          arcs.current.splice(i, 1);
         }
       }
 
-      // Render traveling pulse packets (glowing data electrons along the signals)
-      for (let p = 0; p < packets.current.length; p++) {
-        const pkt = packets.current[p];
-        pkt.xRatio += pkt.speed;
-        if (pkt.xRatio > 1) pkt.xRatio = 0;
+      // Update & render electric sparks
+      for (let s = sparkParticles.current.length - 1; s >= 0; s--) {
+        const sp = sparkParticles.current[s];
+        sp.x += sp.vx;
+        sp.y += sp.vy;
+        sp.vx *= 0.92;
+        sp.vy *= 0.92;
+        sp.life -= 0.05;
 
-        const px = pkt.xRatio * width;
-        const baseNormY = (pkt.waveIndex + 1) / (WAVE_COUNT + 1);
-        const baseY = baseNormY * height;
-        const freq = 0.0025 + (pkt.waveIndex % 5) * 0.0012;
-        const phaseSpeed = 1.0 + (pkt.waveIndex % 3) * 0.4;
-        const phase = time * phaseSpeed + pkt.waveIndex * 0.7;
-        const baseAmp = 8 + (pkt.waveIndex % 4) * 6;
-
-        let py =
-          baseY +
-          Math.sin(px * freq + phase) * baseAmp +
-          Math.cos(px * (freq * 0.45) - phase * 0.6) * (baseAmp * 0.45);
-
-        const pDist = Math.hypot(px - mx, py - my);
-
-        // Packets flare into bright stars of light when entering the pointer's light field
-        if (pDist < radius && mx > -500) {
-          const flare = 1 - pDist / radius;
-          ctx.save();
-          ctx.fillStyle = '#FFFFFF';
-          ctx.shadowColor = '#39FF88';
-          ctx.shadowBlur = 10 + flare * 14;
-          ctx.beginPath();
-          ctx.arc(px, py, pkt.size * (1 + flare * 1.5), 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        } else {
-          // Dim resting pulse
-          ctx.save();
-          ctx.fillStyle = 'rgba(57, 255, 136, 0.2)';
-          ctx.beginPath();
-          ctx.arc(px, py, pkt.size * 0.75, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
+        if (sp.life <= 0) {
+          sparkParticles.current.splice(s, 1);
+          continue;
         }
+
+        ctx.save();
+        ctx.fillStyle = `rgba(255, 255, 255, ${sp.life})`;
+        ctx.shadowColor = '#3cfd89';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(sp.x, sp.y, sp.size * sp.life, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       }
 
       animFrameId.current = requestAnimationFrame(render);
